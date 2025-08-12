@@ -44,8 +44,9 @@ jobs:
           mkdir -p android/fastlane
           echo "$PLAY_SERVICE_ACCOUNT_JSON" > android/fastlane/service-account.json
 
+      # Bước này chỉ chạy nếu secret tồn tại và không rỗng
       - name: Prepare keystore (optional)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 && secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
