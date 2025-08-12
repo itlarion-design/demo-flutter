@@ -1,0 +1,43 @@
+default_platform(:android)
+
+platform :android do
+  before_all do
+    UI.message("Starting Android lanes...")
+  end
+
+  desc "Build Flutter appbundle (release)"
+  lane :build do
+    root = File.expand_path("..", __dir__)
+
+    Dir.chdir(root) do
+      sh "flutter --version"
+      sh "flutter pub get"
+      sh "flutter build appbundle --release"
+    end
+
+    aab = Dir[File.expand_path("../build/app/outputs/bundle/release/*.aab", __dir__)].max_by { |f| File.mtime(f) }
+    UI.user_error!("Không tìm thấy file AAB sau khi build") unless aab
+    Actions.lane_context[:AAB_PATH] = aab
+    UI.success("AAB: #{aab}")
+  end
+
+  desc "Upload lên Google Play - track internal"
+  lane :internal do
+    build
+    aab = Actions.lane_context[:AAB_PATH]
+    supply(
+      aab: aab,
+      track: "internal",
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  after_all do |lane|
+    UI.success("Lane #{lane} hoàn tất!")
+  end
+
+  error do |lane, exception|
+    UI.error("Lane #{lane} lỗi: #{exception.message}")
+  end
+end

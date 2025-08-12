@@ -1,0 +1,12 @@
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+
+keystore.b64
+android/app/upload-keystore.jks
+android/key.properties
+android/fastlane/service-account.json
+fastlane/service-account.json

@@ -1,0 +1,3 @@
+# Sử dụng biến môi trường để không ghi khóa ra file
+json_key_data(ENV["PLAY_SERVICE_ACCOUNT_JSON"])
+package_name(ENV["ANDROID_PACKAGE_NAME"])
