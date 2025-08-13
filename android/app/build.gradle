@@ -3,6 +3,11 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
+repositories {
+    google()
+    mavenCentral()
+    jcenter() // Nếu dùng các package cũ hoặc package không còn trên mavenCentral, hãy thử thêm dòng này
+}
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
