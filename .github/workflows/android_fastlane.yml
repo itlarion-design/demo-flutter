@@ -98,4 +98,4 @@ jobs:
       - name: Build & Upload to Internal
         working-directory: android
         run: |
-          timeout 900s bundle exec fastlane android internal
+          timeout 1800s bundle exec fastlane android internal
