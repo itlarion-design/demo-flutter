@@ -61,21 +61,25 @@ jobs:
       - name: Clean Flutter/Gradle cache
         run: |
           flutter clean
-          rm -rf ~/.pub-cache
           rm -rf ~/.gradle
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
       - name: Patch plugin build.gradle for AGP 8+
         run: |
-          PLUGIN_PATH=$(find $HOME/.pub-cache/hosted/pub.dev/ -type d -name 'flutter_storage_path-*' | head -n 1)
-          BUILD_GRADLE="$PLUGIN_PATH/android/build.gradle"
-          if [ -f "$BUILD_GRADLE" ]; then
-            if ! grep -q "namespace " "$BUILD_GRADLE"; then
-              sed -i '/android {/a \    namespace "com.example.flutter_storage_path"' "$BUILD_GRADLE"
-              echo "Patched namespace in $BUILD_GRADLE"
+          for plugin in flutter_storage_path; do
+            PLUGIN_PATH=$(find $HOME/.pub-cache/hosted/pub.dev/ -type d -name "${plugin}-*" | head -n 1)
+            BUILD_GRADLE="$PLUGIN_PATH/android/build.gradle"
+            if [ -f "$BUILD_GRADLE" ]; then
+              if ! grep -q "namespace " "$BUILD_GRADLE"; then
+                sed -i '/android {/a \    namespace "com.example.'"$plugin"'"' "$BUILD_GRADLE"
+                echo "Patched namespace in $BUILD_GRADLE"
+              fi
+            else
+              echo "No $plugin plugin build.gradle found!"
             fi
-          else
-            echo "No flutter_storage_path plugin build.gradle found!"
-          fi
+          done
 
       - name: Create Google Play credentials
         if: ${{ env.PLAY_SERVICE_ACCOUNT_JSON != '' }}
