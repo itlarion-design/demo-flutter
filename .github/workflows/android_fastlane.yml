@@ -66,18 +66,19 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Patch plugin build.gradle for AGP 8+
+      - name: Debug plugin build.gradle files
         run: |
-          for plugin in flutter_storage_path; do
-            PLUGIN_PATH=$(find $HOME/.pub-cache/hosted/pub.dev/ -type d -name "${plugin}-*" | head -n 1)
-            BUILD_GRADLE="$PLUGIN_PATH/android/build.gradle"
-            if [ -f "$BUILD_GRADLE" ]; then
-              if ! grep -q "namespace " "$BUILD_GRADLE"; then
-                sed -i '/android {/a \    namespace "com.example.'"$plugin"'"' "$BUILD_GRADLE"
-                echo "Patched namespace in $BUILD_GRADLE"
-              fi
+          find $HOME/.pub-cache/ -type f -name "build.gradle" | xargs grep -H "namespace" || true
+
+      - name: Patch all plugin build.gradle for AGP 8+
+        run: |
+          find $HOME/.pub-cache/hosted/pub.dev/ -type f -path "*/android/build.gradle" | while read BUILD_GRADLE; do
+            if ! grep -q "namespace " "$BUILD_GRADLE"; then
+              PLUGIN_NAME=$(basename "$(dirname "$(dirname "$BUILD_GRADLE")")")
+              sed -i "/android {/a \    namespace \"com.example.${PLUGIN_NAME}\"" "$BUILD_GRADLE"
+              echo "Patched namespace in $BUILD_GRADLE"
             else
-              echo "No $plugin plugin build.gradle found!"
+              echo "Namespace already exists in $BUILD_GRADLE"
             fi
           done
 
