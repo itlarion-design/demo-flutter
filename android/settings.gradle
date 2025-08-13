@@ -17,6 +17,8 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        // Thêm repository của Flutter để khắc phục lỗi plugin mới
+        maven { url 'https://storage.googleapis.com/download.flutter.io' }
     }
 }
 
@@ -35,6 +37,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://storage.googleapis.com/download.flutter.io' }
         // Nếu cần thêm repository khác (ví dụ JitPack), thêm ở đây:
         // maven { url "https://jitpack.io" }
     }
