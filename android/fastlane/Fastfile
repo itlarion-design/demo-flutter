@@ -1,6 +1,24 @@
 default_platform(:android)
 
 platform :android do
+  # Helper: chạy lệnh với retry và backoff lũy tiến
+  def with_retry(cmd, attempts: 5, wait: 10)
+    try = 1
+    begin
+      sh(cmd)
+    rescue => e
+      if try < attempts
+        UI.important("Command failed: #{cmd} (attempt #{try}/#{attempts}) - #{e.message}. Retrying in #{wait}s...")
+        sleep wait
+        try += 1
+        wait *= 2
+        retry
+      else
+        raise
+      end
+    end
+  end
+
   before_all do
     UI.message("Starting Android lanes...")
   end
@@ -9,9 +27,14 @@ platform :android do
   lane :build do
     root = File.expand_path("..", __dir__)
 
+    # Cho phép override endpoint qua env nếu cần (mặc định dùng pub.dev và storage.googleapis)
+    pub_hosted_url = ENV.fetch("PUB_HOSTED_URL", "https://pub.dev")
+    flutter_storage = ENV.fetch("FLUTTER_STORAGE_BASE_URL", "https://storage.googleapis.com")
+
     Dir.chdir(root) do
       sh "flutter --version"
-      sh "flutter pub get"
+      # Thêm retry để tránh lỗi mạng tạm thời từ pub.dev
+      with_retry("PUB_HOSTED_URL=#{pub_hosted_url} FLUTTER_STORAGE_BASE_URL=#{flutter_storage} flutter pub get")
       sh "flutter build appbundle --release"
     end
 
