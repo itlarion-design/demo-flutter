@@ -1,12 +1,7 @@
-// Không khai báo repositories ở đây để tuân thủ FAIL_ON_PROJECT_REPOS trong settings.gradle
-
 rootProject.buildDir = '../build'
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-
-subprojects {
     project.evaluationDependsOn(':app')
 }
 
