@@ -75,7 +75,7 @@ jobs:
           find $HOME/.pub-cache/hosted/pub.dev/ -type f -path "*/android/build.gradle" | while read BUILD_GRADLE; do
             if ! grep -q "namespace " "$BUILD_GRADLE"; then
               PLUGIN_DIR=$(basename "$(dirname "$(dirname "$BUILD_GRADLE")")")
-              PLUGIN_NAME=$(echo $PLUGIN_DIR | sed 's/-[0-9\.]\+$//; s/-/_/g')
+              PLUGIN_NAME=$(echo $PLUGIN_DIR | sed 's/-[0-9\.]*$//; s/-/_/g')
               sed -i "/android {/a \    namespace \"com.example.${PLUGIN_NAME}\"" "$BUILD_GRADLE"
               echo "Patched namespace in $BUILD_GRADLE with com.example.${PLUGIN_NAME}"
             fi
