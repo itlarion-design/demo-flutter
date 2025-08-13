@@ -10,7 +10,6 @@ jobs:
     name: Build & Upload Internal
     runs-on: ubuntu-latest
 
-    # Đưa secrets vào ENV ở cấp job để có thể dùng trong điều kiện if
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
       FASTLANE_SKIP_UPDATE_CHECK: "1"
@@ -31,6 +30,17 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Install Android SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          unzip -qq cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/bin:$ANDROID_HOME/platform-tools:$PATH
+          yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -44,20 +54,16 @@ jobs:
           bundler-cache: true
 
       - name: Create Google Play credentials
-        # Nếu cần, có thể thêm điều kiện if để chỉ chạy khi secret có giá trị
         if: ${{ env.PLAY_SERVICE_ACCOUNT_JSON != '' }}
         run: |
           mkdir -p android/fastlane
           echo "$PLAY_SERVICE_ACCOUNT_JSON" > android/fastlane/service-account.json
 
-      # Bước này CHỈ chạy nếu keystore đã được set trong secrets
       - name: Prepare keystore (optional)
         if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
         run: |
           mkdir -p android/app
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-
-          # LƯU Ý: dùng EOF (không có quote) để biến được expand ra giá trị thực
           cat > android/key.properties <<EOF
           storePassword=${ANDROID_KEYSTORE_PASSWORD}
           keyPassword=${ANDROID_KEY_PASSWORD}
