@@ -1,4 +1,5 @@
 pluginManagement {
+    // Đọc đường dẫn Flutter SDK từ local.properties
     def localProperties = new Properties()
     def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
     if (localPropertiesFile.exists()) {
@@ -23,16 +24,19 @@ plugins {
     // Bắt buộc để kích hoạt loader của Flutter
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
 
-    // Khai báo phiên bản plugin cho Android và Kotlin
+    // Khai báo phiên bản plugin cho Android và Kotlin (giữ nguyên theo cấu hình của bạn)
     id "com.android.application" version "8.3.2" apply false
     id "org.jetbrains.kotlin.android" version "1.9.24" apply false
 }
 
 dependencyResolutionManagement {
+    // Chặn repositories ở cấp project/module
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        // Nếu cần thêm repository khác (ví dụ JitPack), thêm ở đây:
+        // maven { url "https://jitpack.io" }
     }
 }
 
